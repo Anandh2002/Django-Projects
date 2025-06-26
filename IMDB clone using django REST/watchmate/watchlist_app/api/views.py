@@ -8,10 +8,12 @@ from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated # type: ignore
 from rest_framework import permissions
+from rest_framework.throttling import UserRateThrottle,AnonRateThrottle,ScopedRateThrottle
 
 from watchlist_app.models import *
 from watchlist_app.api.permissions import IsAdminOrReadOnly,IsReviewUserOrReadOnly
 from watchlist_app.api.serializers import *
+from watchlist_app.api.throttling import ReviewcreateThrottle,ReviewListThrottle
 
 from django.shortcuts import get_object_or_404
 
@@ -65,6 +67,8 @@ class StreamPlatformVS(viewsets.ModelViewSet):
     
 class ReviewCreate(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ReviewcreateThrottle, AnonRateThrottle]
+    
     serializer_class = ReviewSerializer
     
     def get_queryset(self):
@@ -88,9 +92,9 @@ class ReviewCreate(generics.CreateAPIView):
             
         serializer.save(watchlist=watchlist,review_user=review_user)
 
-
 class ReviewList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ReviewListThrottle, AnonRateThrottle]
     serializer_class = ReviewSerializer    
     def get_queryset(self):
         pk=self.kwargs['pk']
@@ -98,6 +102,8 @@ class ReviewList(generics.ListAPIView):
     
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsReviewUserOrReadOnly]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope='review-detail'
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
