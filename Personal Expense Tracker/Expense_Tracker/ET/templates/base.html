@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Tracker</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="{% static 'js/script.js' %}"></script>
+</head>
+<body>
+  {% comment %} <button onclick="toggleDarkMode()" class="btn">Toggle Dark Mode</button> {% endcomment %}
+  <div class="nav-bar">
+    {% if user.is_authenticated %}
+      <p>
+        Hi <strong>{{ user.username }}</strong> |
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary logout-btn">Logout</button>
+        </form>
+      </p>
+    {% else %}
+      <p>
+        <a href="{% url 'login' %}" class="btn">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+      </p>
+    {% endif %}
+  </div>
+
+  <hr>
+
+  <div class="main-content">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
